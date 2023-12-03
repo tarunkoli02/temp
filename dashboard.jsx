@@ -45,7 +45,7 @@ const Dashboard = () => {
     if(selectAll){
           setSelectedRows([]);
     }else{
-        const selected = [];
+        const selected = [...selectedRows];
         users.forEach((user)=>{
             selected.push(user.id);
         })
@@ -56,9 +56,10 @@ const Dashboard = () => {
   };
 
   const changePage = (page) => {
-    console.log("clicked");
+    const select = document.getElementById("main_select");
+    if(select) select.checked = false;
     setSelectAll(false);
-    setSelectedRows([]);
+    // setSelectedRows([]);
     setCurrentPage(page);
   }
 
@@ -68,7 +69,7 @@ const Dashboard = () => {
         <thead>
           <tr className="m-5">
             <th className="p-3">
-              <input type="checkbox" onChange={handleSelectAll}/>
+              <input type="checkbox" id="main_select" onChange={handleSelectAll}/>
             </th>
             <th className="p-3">Name</th>
             <th className="p-3">Email</th>
