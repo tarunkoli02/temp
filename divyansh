@@ -1,0 +1,109 @@
+// ChipComponent.jsx
+
+import React, { useState, useRef } from "react";
+import Chip from "./Chip";
+import json from "./data";
+
+const ChipComponent = (props) => {
+  const [data, setData] = useState(json || []);
+  const [tags, setTags] = useState([]);
+  const [highlightedChip, setHighlightedChip] = useState(null);
+  const [inputValue, setInputValue] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
+  const inputRef = useRef(null);
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && inputValue.trim()) {
+      setTags([...tags, inputValue]);
+      setInputValue("");
+      setFilteredItems(data.filter((item) => !tags.includes(item)));
+    } else if (e.key === "Backspace" && e.target.value === "") {
+      if (highlightedChip !== null) {
+        setTags(tags.filter((el, i) => i !== highlightedChip));
+        setHighlightedChip(null);
+      } else {
+        const lastTagIndex = tags.length - 1;
+        if (lastTagIndex >= 0) {
+          setHighlightedChip(lastTagIndex);
+        }
+      }
+    }
+  }
+
+  function removeTag(index) {
+    setTags(tags.filter((el, i) => i !== index));
+    setHighlightedChip(null);
+    setFilteredItems(data.filter((item) => !tags.includes(item)));
+  }
+
+  function handleInputChange(e) {
+    const value = e.target.value;
+    setInputValue(value);
+
+    // Filter items based on user input, excluding those already in tags
+    const filtered = data.filter(
+      (item) =>
+        item.name.toLowerCase().includes(value.toLowerCase()) &&
+        !tags.includes(item.name)
+    );
+
+    setFilteredItems(filtered);
+  }
+
+  function handleItemClick(item) {
+    setTags([...tags, item.name]);
+
+    setInputValue("");
+    setHighlightedChip(null);
+    setFilteredItems(
+      filteredItems.filter((filteredItem) => filteredItem !== item)
+    );
+  }
+
+  return (
+    <>
+      <div className="border-2 border-black p-2 rounded-md max-w-2xl mx-auto mt-4 flex flex-wrap gap-2">
+        {tags.map((tag, index) => (
+          <div key={index}>
+            <span className="text">
+              <Chip
+                index={index}
+                text={tag}
+                removeTag={removeTag}
+                highlighted={highlightedChip === index}
+              />
+            </span>
+          </div>
+        ))}
+        <input
+          ref={inputRef}
+          onFocus={() => {
+            console.log("filteredItems", filteredItems);
+            console.log("Tags", tags);
+            setFilteredItems(data.filter((item) => !tags.includes(item.name)));
+          }}
+          onKeyDown={handleKeyDown}
+          onChange={handleInputChange}
+          value={inputValue}
+          type="text"
+          className="flex-grow p-2 border-none outline-none"
+          placeholder="Type something"
+        />
+      </div>
+      <ul className="list-none p-0 m-0 mt-2">
+        {filteredItems.map((item) => (
+          <li
+            key={item.id}
+            className="cursor-pointer p-2 hover:bg-gray-200"
+            onClick={() => handleItemClick(item)}
+          >
+            {item.name}
+          </li>
+        ))}
+      </ul>
+      
+    </>
+  );
+};
+
+export default ChipComponent;
